@@ -1,0 +1,135 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String          @id @default(cuid())
+  FirstName       String?
+  LastName        String?
+  password        String?
+  username        String?         @unique
+  email           String?         @unique
+  image           String?
+
+  description     String?   @db.VarChar(1000)
+  displayName     String?
+  title           String?  @db.VarChar(1000)
+  links           Link[]
+  projects        Project[]
+  presentations   Presentation[]
+  Session         Session[]
+  SiteDesign      SiteDesign[]
+  ArticleConfig   ArticleConfig[]
+  Account         Account?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+model SiteDesign {
+  userId              String @unique
+  accentColor         String?
+  backgroundColor     String?
+  primaryFontColor    String?
+  secondaryFontColor  String?
+  primaryFontFamily   String?
+  secondaryFontFamily String?
+  projectDisplayLayout   String?
+  presentationDisplayLayout String?
+  presentationThumbnail  String?
+  
+  user                User   @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+model ArticleConfig {
+  userId              String       @unique
+  articleThumbnail    String?
+  articleDisplayLayout String?
+  articleFeedLink String?
+  user                User         @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+model Account {
+  id                       String  @id @default(cuid())
+  userId                   String  @unique
+  type                     String
+  provider                 String
+  providerAccountId        String
+  refresh_token            String? @db.Text
+  access_token             String? @db.Text
+  expires_at               Int?
+  token_type               String?
+  scope                    String?
+  id_token                 String? @db.Text
+  session_state            String?
+  refresh_token_expires_in Int?
+  user                     User?   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Presentation {
+  id                  Int      @id @default(autoincrement())
+  userId              String
+  presentationTitle   String   @db.VarChar(200)
+  presentationLink    String   @db.VarChar(200)
+  presentationDescription   String   @db.VarChar(1000)
+  dateOfPresentation  DateTime
+  user                User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model Project {
+  id                  Int      @id @default(autoincrement())
+  userId              String
+  projectTitle        String?   @db.VarChar(200)
+  projectDescription  String?   @db.VarChar(1000)
+  projectLink         String?   @db.VarChar(200)
+  isVisible           Boolean
+  
+  user                User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model Link {
+  id      Int    @id @default(autoincrement())
+  userId  String
+  url    String @db.VarChar(200)
+  title   String @db.VarChar(255)
+  icon    String? @db.VarChar(255)
+
+  user    User   @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}

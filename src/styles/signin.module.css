@@ -1,0 +1,26 @@
+.signinForm {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    margin-top: calc(200px);
+}
+.signinForm > h1 {
+    text-align: center;
+    margin-bottom: 50px;
+    font-weight: 500;
+}
+.signinFormItem {
+    margin-bottom: 15px;
+    width: 100%;
+}
+.customButton {
+    background-color: rgb(42, 18, 161); 
+    border-color: rgb(42, 18, 161); 
+    color: white; 
+    width: 100%;
+}
+
+.customButton:hover {
+    background-color: #333; 
+    border-color: #333; 
+}

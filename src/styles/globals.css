@@ -1,0 +1,48 @@
+body
+{
+    background-color: #DDDBDB;
+    margin: 0;
+}
+label[for="nav-toggle"] {
+  position: absolute;
+  right: 0;
+  width: 3rem;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+label[for="nav-footer-toggle"] {
+  position: absolute;
+  right: 0;
+  width: 3rem;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s, opacity 0.2s;
+}
+footer > div
+{
+    display: flex;
+    width: 1000px;
+    margin: 0 auto;
+    justify-content: space-between;
+    align-items: center;
+    height: 50px;
+}
+footer > div > ul
+{
+    display: flex;
+    gap: 10px;
+}
+footer a
+{
+    color: #666;
+}
+ul
+{
+  list-style-type: none;
+}
