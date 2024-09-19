@@ -238,7 +238,7 @@ export default function Home() {
       <Layout style={{ backgroundColor: designData.backgroundColor }} className={styles.lay} >
 
         <Dropdown overlay={menu} placement="bottomRight">
-          <Button shape="circle" icon={<EllipsisOutlined />} style={{ right: "130px", position: "absolute", top: "85px" }} />
+          <Button shape="circle" icon={<EllipsisOutlined />} className={styles.customizeButton} />
         </Dropdown>
 
         <Layout.Content>
