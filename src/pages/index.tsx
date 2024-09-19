@@ -233,13 +233,35 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Portfolio</title>
-        <meta property="og:title" content="Masite: A Portfolio Website Builder" />
-        <meta property="og:description" content="Create your own portfolio website effortlessly using Masite" />
-        <meta property="og:image" content="https://raw.githubusercontent.com/emphay/masite-portfolio-website-builder/main/public/img/sitedesign.png" />
-        <meta property="og:url" content="https://masite-portfolio-website-builder.vercel.app/" />
-        <meta property="og:type" content="website" />
-      </Head>
+  <title>Masite: A Portfolio Website Builder</title>
+  <meta name="description" content="Create your own portfolio website effortlessly using Masite, with customizable designs and features tailored for developers." />
+  <meta name="keywords" content="portfolio builder, web development, create portfolio, customizable designs" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta property="og:title" content="Masite: A Portfolio Website Builder" />
+  <meta property="og:description" content="Create your own portfolio website effortlessly using Masite" />
+  <meta property="og:image" content="https://raw.githubusercontent.com/emphay/masite-portfolio-website-builder/main/public/img/sitedesign.png" />
+  <meta property="og:url" content="https://masite-portfolio-website-builder.vercel.app/" />
+  <meta property="og:type" content="website" />
+  <link rel="canonical" href="https://masite-portfolio-website-builder.vercel.app/" />
+  <script type="application/ld+json">
+    {`
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "${aboutData.displayName}",
+        "jobTitle": "${aboutData.title}",
+        "image": "${aboutData.image}",
+        "url": "https://masite-portfolio-website-builder.vercel.app/",
+        "sameAs": [
+          "${aboutData.githubLink}",
+          "${aboutData.linkedinLink}",
+          "${aboutData.youtubeLink}",
+          "${aboutData.instagramLink}"
+        ]
+      }
+    `}
+  </script>
+</Head>
       <Layout style={{ backgroundColor: designData.backgroundColor }} className={styles.lay} >
 
         <Dropdown overlay={menu} placement="bottomRight">
