@@ -234,7 +234,7 @@ export default function Home() {
     <>
       <Head>
         <meta name="description" content="Build your own Portfolio Website with Masite" />
-        <meta property="og:image" content={"https://github.com/emphay/masite-portfolio-website-builder/blob/main/public/img/sitedesign.png"} />
+        <meta property="og:image" content={"https://raw.githubusercontent.com/emphay/masite-portfolio-website-builder/main/public/img/sitedesign.png"} />
       </Head>
       <Layout style={{ backgroundColor: designData.backgroundColor }} className={styles.lay} >
 
