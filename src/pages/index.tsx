@@ -233,36 +233,21 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Masite: A Portfolio Website Builder</title>
-        <meta
-          name="description"
-          content="Masite is the ultimate portfolio website builder, crafted for professionals, freelancers, and creatives who want to build beautiful, responsive, and fully customized websites effortlessly. Showcase your work, share your story, and stand out online—all without writing a single line of code."
-        />
 
-        {/* Open Graph Meta Tags */}
+        <title>Masite: A Portfolio Website Builder</title>
+        <meta name="description" content="Masite is the ultimate portfolio website builder, crafted for professionals, freelancers, and creatives who want to build beautiful, responsive, and fully customized websites effortlessly. Showcase your work, share your story, and stand out online—all without writing a single line of code." />
+
         <meta property="og:url" content="https://masite-portfolio-website-builder.vercel.app/" />
         <meta property="og:type" content="website" />
         <meta property="og:title" content="Masite: A Portfolio Website Builder" />
-        <meta
-          property="og:description"
-          content="Masite is the ultimate portfolio website builder, crafted for professionals, freelancers, and creatives who want to build beautiful, responsive, and fully customized websites effortlessly. Showcase your work, share your story, and stand out online—all without writing a single line of code."
-        />
-        <meta
-          property="og:image"
-          content="https://raw.githubusercontent.com/emphay/masite-portfolio-website-builder/main/public/img/sitedesign.png"
-        />
+        <meta property="og:description" content="Masite is the ultimate portfolio website builder, crafted for professionals, freelancers, and creatives who want to build beautiful, responsive, and fully customized websites effortlessly. Showcase your work, share your story, and stand out online—all without writing a single line of code." />
+        <meta property="og:image" content="https://raw.githubusercontent.com/emphay/masite-portfolio-website-builder/main/public/img/sitedesign.png" />
 
-        {/* Twitter Meta Tags */}
         <meta property="twitter:card" content="summary_large_image" />
         <meta property="twitter:title" content="Masite: A Portfolio Website Builder" />
-        <meta
-          property="twitter:description"
-          content="Masite is the ultimate portfolio website builder, crafted for professionals, freelancers, and creatives who want to build beautiful, responsive, and fully customized websites effortlessly. Showcase your work, share your story, and stand out online—all without writing a single line of code."
-        />
-        <meta
-          property="twitter:image"
-          content="https://raw.githubusercontent.com/emphay/masite-portfolio-website-builder/main/public/img/sitedesign.png"
-        />
+        <meta property="twitter:description" content="Masite is the ultimate portfolio website builder, crafted for professionals, freelancers, and creatives who want to build beautiful, responsive, and fully customized websites effortlessly. Showcase your work, share your story, and stand out online—all without writing a single line of code." />
+        <meta property="twitter:image" content="https://raw.githubusercontent.com/emphay/masite-portfolio-website-builder/main/public/img/sitedesign.png" />
+
       </Head>
 
 
