@@ -234,14 +234,18 @@ export default function Home() {
     <>
       <Head>
         <title>Masite: A Portfolio Website Builder</title>
-        <meta name="description" content="Create your own portfolio website effortlessly using Masite, with customizable designs and features tailored for developers." />
-        <meta name="keywords" content="portfolio builder, web development, create portfolio, customizable designs" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta property="og:title" content="Masite: A Portfolio Website Builder" />
-        <meta property="og:description" content="Create your own portfolio website effortlessly using Masite" />
-        <meta property="og:image" content="https://raw.githubusercontent.com/emphay/masite-portfolio-website-builder/main/public/img/sitedesign.png" />
+        <meta name="description" content="Build Your Own Portfolio Website with Masite" />
+
         <meta property="og:url" content="https://masite-portfolio-website-builder.vercel.app/" />
         <meta property="og:type" content="website" />
+        <meta property="og:description" content="Build Your Own Portfolio Website with Masite" />
+        <meta property="og:image" content="https://raw.githubusercontent.com/emphay/masite-portfolio-website-builder/main/public/img/sitedesign.png" />
+
+
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:title" content="Masite: A Portfolio Website Builder" />
+        <meta property="twitter:description" content="Build Your Own Portfolio Website with Masite" />
+        <meta property="twitter:image" content="https://raw.githubusercontent.com/emphay/masite-portfolio-website-builder/main/public/img/sitedesign.png" />
       </Head>
 
       <Layout style={{ backgroundColor: designData.backgroundColor }} className={styles.lay} >
