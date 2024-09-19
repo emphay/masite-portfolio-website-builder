@@ -235,7 +235,7 @@ export default function Home() {
       <Head>
         <title>Portfolio</title>
       </Head>
-      <Layout style={{ backgroundColor: designData.backgroundColor }} >
+      <Layout style={{ backgroundColor: designData.backgroundColor }} className={styles.lay} >
 
         <Dropdown overlay={menu} placement="bottomRight">
           <Button shape="circle" icon={<EllipsisOutlined />} style={{ right: "130px", position: "absolute", top: "85px" }} />

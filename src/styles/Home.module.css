@@ -313,3 +313,24 @@ div.presentation__video > img:last-child {
   color: var(--font-color);
   font-weight: bold;
 }
+.customizeButton
+{
+right: 130px;
+position: absolute;
+ top: 85px;
+}
+@media screen and (max-width:1210px)
+{
+  .lay{
+    width: calc(100vw + 1000px);
+  }
+}
+@media screen and (max-width:600px)
+{
+  .customizeButton
+  {
+    left: calc(100vw + 750px);
+    position: absolute;
+ top: 85px;
+  }
+}
