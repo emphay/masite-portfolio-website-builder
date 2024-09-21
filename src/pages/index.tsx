@@ -28,7 +28,8 @@ import {
 import { useRouter } from "next/router";
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
+let prisma: PrismaClient;
+
 const inter = Inter({ subsets: ["latin"] });
 const { Sider, Content } = Layout;
 
@@ -41,7 +42,7 @@ interface HomeProps {
   presentationData: any;
 }
 
-const Home: FC<HomeProps> = ({
+const Home: React.FC<HomeProps> = ({
   designData,
   navData,
   aboutData,
@@ -328,6 +329,11 @@ const Home: FC<HomeProps> = ({
 export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
+
+  if (!prisma) {
+    prisma = new PrismaClient();
+  }
+
   const user = await prisma.user.findFirst({
     select: {
       id: true,
