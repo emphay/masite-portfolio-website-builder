@@ -1,7 +1,7 @@
 import Head from "next/head";
 import Image from "next/image";
 import { Inter } from "next/font/google";
-import { FC, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { getSession, useSession } from "next-auth/react";
 import { GetServerSidePropsContext } from "next";
 import styles from "@/styles/Home.module.css";
@@ -26,56 +26,152 @@ import {
   EllipsisOutlined
 } from "@ant-design/icons";
 import { useRouter } from "next/router";
-import { PrismaClient } from '@prisma/client';
-
-let prisma: PrismaClient;
+import { calc } from "antd/es/theme/internal";
 
 const inter = Inter({ subsets: ["latin"] });
 const { Sider, Content } = Layout;
 
-interface HomeProps {
-  designData: any;
-  navData: any;
-  aboutData: any;
-  articlesData: any;
-  projectsData: any;
-  presentationData: any;
-}
-
-const Home: React.FC<HomeProps> = ({
-  designData,
-  navData,
-  aboutData,
-  articlesData,
-  projectsData,
-  presentationData
-}) => {
-
+export default function Home() {
+  //const { data: session, status } = useSession();
   const router = useRouter();
+
+  const [designData, setDesignData] = useState<SiteDesignConfig | undefined>(undefined);
+  const [navData, setNavData] = useState<NavConfig | undefined>(undefined);
+  const [aboutData, setAboutData] = useState<AboutConfig | undefined>(undefined);
+  const [articlesData, setArticlesData] = useState<ArticlesConfig | undefined>(undefined);
+  const [projectsData, setProjectsData] = useState<ProjectsConfig | undefined>(undefined);
+  const [presentationData, setPresentationData] = useState<PresentationConfig | undefined>(undefined);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log("Design Data:", designData);
-    console.log("Nav Data:", navData);
-    console.log("About Data:", aboutData);
-    console.log("Articles Data:", articlesData);
-    console.log("Projects Data:", projectsData);
-    console.log("Presentation Data:", presentationData);
-    if (!designData) console.log("Missing: designData");
-    if (!navData) console.log("Missing: navData");
-    if (!aboutData) console.log("Missing: aboutData");
-    if (!articlesData) console.log("Missing: articlesData");
-    if (!projectsData) console.log("Missing: projectsData");
-    if (!presentationData) console.log("Missing: presentationData");
+    const fetchDesignData = async () => {
+      // if (!session) {
+      //   console.error("User session is not available");
+      //   return;
+      // }
 
-    if (designData && navData && aboutData && articlesData && projectsData && presentationData) {
-      setLoading(false);
-    } else {
-      console.log("Some data is missing");
-    }
-  }, [designData, navData, aboutData, articlesData, projectsData, presentationData]);
+      try {
+        const response = await fetch("/api/getProfile");
+        if (!response.ok) {
+          throw new Error("Failed to fetch profile data");
+        }
+        const data = await response.json();
+
+        console.log("Data:", data);
+        setLoading(false);
+
+        const siteDesign = data.SiteDesign?.[0] || {};
+        const contact = data.links.find((link: { icon: string }) => link.icon === "Contacts") || {};
+
+        setDesignData({
+          accentColor: siteDesign.accentColor,
+          backgroundColor: siteDesign.backgroundColor,
+          primaryFontColor: siteDesign.primaryFontColor,
+          secondaryFontColor: siteDesign.secondaryFontColor,
+          primaryFontFamily: siteDesign.primaryFontFamily,
+          secondaryFontFamily: siteDesign.secondaryFontFamily,
+        });
+
+        setNavData({
+          id: data.id,
+          firstName: data.FirstName,
+          lastName: data.LastName,
+          aboutText: data.links.find((link: any) => link.url.startsWith("#about"))?.title || "",
+          contactType: contact.title || "",
+          contactValue: contact.url || "",
+          articleText: data.links.find((link: any) => link.url.startsWith("#articles"))?.title || "",
+          projectText: data.links.find((link: any) => link.url.startsWith("#projects"))?.title || "",
+          presentationText: data.links.find((link: any) => link.url.startsWith("#presentations"))?.title || "",
+          // Include the missing properties with either actual or default values
+          accentColor: siteDesign.accentColor || "#000000",
+          backgroundColor: siteDesign.backgroundColor || "#ffffff",
+          primaryFontColor: siteDesign.primaryFontColor || "#000000",
+          primaryFontFamily: siteDesign.primaryFontFamily || "Arial",
+          secondaryFontColor: siteDesign.secondaryFontColor || "#666666",
+          secondaryFontFamily: siteDesign.secondaryFontFamily || "Arial",
+        });
 
 
+        setAboutData({
+          id: data.id,
+          image: data.image,
+          displayName: data.displayName,
+          title: data.title,
+          description: data.description,
+          instagramLink:
+            data.links.find((link: any) => link.title === "Instagram")?.url || "",
+          linkedinLink:
+            data.links.find((link: any) => link.title === "LinkedIn")?.url || "",
+          githubLink:
+            data.links.find((link: any) => link.title === "Github")?.url || "",
+          youtubeLink:
+            data.links.find((link: any) => link.title === "YouTube")?.url || "",
+          accentColor: data.SiteDesign[0].accentColor,
+          backgroundColor: data.SiteDesign[0].backgroundColor,
+          primaryFontColor: data.SiteDesign[0].primaryFontColor,
+          secondaryFontColor: data.SiteDesign[0].secondaryFontColor,
+          primaryFontFamily: data.SiteDesign[0].primaryFontFamily,
+          secondaryFontFamily: data.SiteDesign[0].secondaryFontFamily,
+        });
+
+        setArticlesData({
+          id: data.id,
+          articleThumbnail: data.ArticleConfig[0].articleThumbnail,
+          articleDisplayLayout: data.ArticleConfig[0].articleDisplayLayout,
+          articleFeedLink: data.ArticleConfig[0].articleFeedLink,
+          primaryFontColor: data.SiteDesign[0].primaryFontColor,
+          secondaryFontColor: data.SiteDesign[0].secondaryFontColor,
+          primaryFontFamily: data.SiteDesign[0].primaryFontFamily,
+          secondaryFontFamily: data.SiteDesign[0].secondaryFontFamily,
+        });
+
+        const githubLink = data.links.find((link: any) => link.title === "Github")?.url || "";
+        const githubUsername = githubLink.split("/").pop() || "";
+
+        setProjectsData({
+          id: data.id,
+          projectDisplayLayout: data.SiteDesign?.[0]?.projectDisplayLayout || "card",
+          githubLink: data.links.find((link: any) => link.title === "Github")?.url || "",
+          primaryFontFamily: data.SiteDesign?.[0]?.primaryFontFamily || "Arial",
+          secondaryFontColor: data.SiteDesign?.[0]?.secondaryFontColor || "#666666",
+          secondaryFontFamily: data.SiteDesign?.[0]?.secondaryFontFamily || "Arial",
+          projects: (data.projects || []).map((project: any) => ({
+            id: project.id || 0,
+            projectTitle: project.projectTitle || "",
+            projectDescription: project.projectDescription || "",
+            projectLink: project.projectLink || "",
+            isVisible: project.isVisible ?? true,
+          })),
+          handleProjectsConfigUpdate: (updatedConfig: ProjectsConfig) => {
+            // Update the state with the new config
+            setProjectsData(updatedConfig);
+          }
+        });
+
+
+        setPresentationData({
+          id: data.id,
+          presentationDisplayLayout: siteDesign.presentationDisplayLayout || "Grid",
+          presentationThumbnail: siteDesign.presentationThumbnail || "OFF",
+          primaryFontColor: data.SiteDesign[0].primaryFontColor,
+          secondaryFontColor: data.SiteDesign[0].secondaryFontColor,
+          primaryFontFamily: data.SiteDesign[0].primaryFontFamily,
+          secondaryFontFamily: data.SiteDesign[0].secondaryFontFamily,
+          presentations: data.presentations.map((presentation: any) => ({
+            presentationTitle: presentation.presentationTitle || "",
+            presentationLink: presentation.presentationLink || "",
+            presentationDescription: presentation.presentationDescription || "",
+            dateOfPresentation: presentation.dateOfPresentation ? new Date(presentation.dateOfPresentation) : null,
+          })),
+        });
+
+      } catch (error) {
+        console.error("Error fetching design data:", error);
+      }
+    };
+
+    fetchDesignData();
+  });
 
   if (loading) {
     return (
@@ -90,7 +186,6 @@ const Home: React.FC<HomeProps> = ({
       />
     );
   }
-  console.log("Design Data", designData);
 
   if (!designData || !navData || !aboutData || !articlesData || !projectsData || !presentationData) {
     return <div>Error loading data. Kindly Add Data</div>;
@@ -139,24 +234,13 @@ const Home: React.FC<HomeProps> = ({
   return (
     <>
       <Head>
-
-        <title>Masite: A Portfolio Website Builder</title>
-        <meta name="description" content="Masite is the ultimate portfolio website builder, crafted for professionals, freelancers, and creatives who want to build beautiful, responsive, and fully customized websites effortlessly. Showcase your work, share your story, and stand out online—all without writing a single line of code." />
-
+        <title>Portfolio</title>
+        <meta property="og:title" content="Masite: A Portfolio Website Builder" />
+        <meta property="og:description" content="Create your own portfolio website effortlessly using Masite" />
+        <meta property="og:image" content="https://raw.githubusercontent.com/emphay/masite-portfolio-website-builder/main/public/img/sitedesign.png" />
         <meta property="og:url" content="https://masite-portfolio-website-builder.vercel.app/" />
         <meta property="og:type" content="website" />
-        <meta property="og:type" content="Masite: A Portfolio Website Builder" />
-        <meta property="og:description" content="Masite is the ultimate portfolio website builder, crafted for professionals, freelancers, and creatives who want to build beautiful, responsive, and fully customized websites effortlessly. Showcase your work, share your story, and stand out online—all without writing a single line of code." />
-        <meta property="og:image" content="https://raw.githubusercontent.com/emphay/masite-portfolio-website-builder/main/public/img/sitedesign.png" />
-
-        <meta property="twitter:card" content="" />
-        <meta property="twitter:title" content="Masite: A Portfolio Website Builder" />
-        <meta property="twitter:description" content="Masite is the ultimate portfolio website builder, crafted for professionals, freelancers, and creatives who want to build beautiful, responsive, and fully customized websites effortlessly. Showcase your work, share your story, and stand out online—all without writing a single line of code." />
-        <meta property="twitter:image" content="https://raw.githubusercontent.com/emphay/masite-portfolio-website-builder/main/public/img/sitedesign.png" />
-
       </Head>
-
-
       <Layout style={{ backgroundColor: designData.backgroundColor }} className={styles.lay} >
 
         <Dropdown overlay={menu} placement="bottomRight">
@@ -330,135 +414,7 @@ export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
 
-  if (!prisma) {
-    prisma = new PrismaClient();
-  }
-
-  const user = await prisma.user.findFirst({
-    select: {
-      id: true,
-      FirstName: true,
-      LastName: true,
-      username: true,
-      email: true,
-      image: true,
-      displayName: true,
-      title: true,
-      description: true,
-      links: true,
-      projects: true,
-      presentations: true,
-      SiteDesign: true,
-      ArticleConfig: true,
-    },
-  });
-  console.log(user);
-
-  if (!user) {
-    return {
-      notFound: true,
-    };
-  }
-
-  const presentations = user.presentations.map(presentation => ({
-    ...presentation,
-    dateOfPresentation: presentation.dateOfPresentation.toISOString(),
-  }));
-
-  const navLinks = user.links.reduce((acc: any, link: any) => {
-    if (link.url.startsWith("#")) {
-      acc[link.url.substring(1)] = link.title;
-    }
-    return acc;
-  }, {});
-
-  const contactLink = user.links.find((link: any) => link.icon === "Contacts");
-
   return {
-    props: {
-      designData: {
-        accentColor: user.SiteDesign[0]?.accentColor || "#000000",
-        backgroundColor: user.SiteDesign[0]?.backgroundColor || "#ffffff",
-        primaryFontColor: user.SiteDesign[0]?.primaryFontColor || "#000000",
-        secondaryFontColor: user.SiteDesign[0]?.secondaryFontColor || "#666666",
-        primaryFontFamily: user.SiteDesign[0]?.primaryFontFamily || "Arial",
-        secondaryFontFamily: user.SiteDesign[0]?.secondaryFontFamily || "Arial",
-      },
-      navData: {
-        id: user.id,
-        firstName: user.FirstName,
-        lastName: user.LastName,
-        aboutText: navLinks.about || "About",
-        articleText: navLinks.articles || "Articles",
-        projectText: navLinks.projects || "Projects",
-        presentationText: navLinks.presentations || "Presentations",
-        contactType: contactLink?.title || "",
-        contactValue: contactLink?.url || "",
-        accentColor: user.SiteDesign[0]?.accentColor || "#000000",
-        backgroundColor: user.SiteDesign[0]?.backgroundColor || "#ffffff",
-        primaryFontColor: user.SiteDesign[0]?.primaryFontColor || "#000000",
-        primaryFontFamily: user.SiteDesign[0]?.primaryFontFamily || "Arial",
-        secondaryFontColor: user.SiteDesign[0]?.secondaryFontColor || "#666666",
-        secondaryFontFamily: user.SiteDesign[0]?.secondaryFontFamily || "Arial",
-      },
-      aboutData: {
-        id: user.id,
-        image: user.image,
-        displayName: user.displayName,
-        title: user.title,
-        description: user.description,
-        instagramLink: user.links.find((link: any) => link.title === "Instagram")?.url || "",
-        linkedinLink: user.links.find((link: any) => link.title === "LinkedIn")?.url || "",
-        githubLink: user.links.find((link: any) => link.title === "Github")?.url || "",
-        youtubeLink: user.links.find((link: any) => link.title === "YouTube")?.url || "",
-        accentColor: user.SiteDesign[0]?.accentColor || "#000000",
-        backgroundColor: user.SiteDesign[0]?.backgroundColor || "#ffffff",
-        primaryFontColor: user.SiteDesign[0]?.primaryFontColor || "#000000",
-        secondaryFontColor: user.SiteDesign[0]?.secondaryFontColor || "#666666",
-        primaryFontFamily: user.SiteDesign[0]?.primaryFontFamily || "Arial",
-        secondaryFontFamily: user.SiteDesign[0]?.secondaryFontFamily || "Arial",
-      },
-      articlesData: {
-        id: user.id,
-        articleThumbnail: user.ArticleConfig[0]?.articleThumbnail || "",
-        articleDisplayLayout: user.ArticleConfig[0]?.articleDisplayLayout || "list",
-        articleFeedLink: user.ArticleConfig[0]?.articleFeedLink || "",
-        primaryFontColor: user.SiteDesign[0]?.primaryFontColor || "#000000",
-        secondaryFontColor: user.SiteDesign[0]?.secondaryFontColor || "#666666",
-        primaryFontFamily: user.SiteDesign[0]?.primaryFontFamily || "Arial",
-        secondaryFontFamily: user.SiteDesign[0]?.secondaryFontFamily || "Arial",
-      },
-      projectsData: {
-        id: user.id,
-        projectDisplayLayout: user.SiteDesign[0]?.projectDisplayLayout || "card",
-        githubLink: user.links.find((link: any) => link.title === "Github")?.url || "",
-        primaryFontFamily: user.SiteDesign[0]?.primaryFontFamily || "Arial",
-        secondaryFontColor: user.SiteDesign[0]?.secondaryFontColor || "#666666",
-        secondaryFontFamily: user.SiteDesign[0]?.secondaryFontFamily || "Arial",
-        projects: (user.projects || []).map((project: any) => ({
-          id: project.id,
-          projectTitle: project.projectTitle || "",
-          projectDescription: project.projectDescription || "",
-          projectLink: project.projectLink || "",
-          isVisible: project.isVisible ?? true,
-        })),
-      },
-      presentationData: {
-        id: user.id,
-        presentationDisplayLayout: user.SiteDesign[0]?.presentationDisplayLayout || "Grid",
-        presentationThumbnail: user.SiteDesign[0]?.presentationThumbnail || "OFF",
-        primaryFontColor: user.SiteDesign[0]?.primaryFontColor || "#000000",
-        secondaryFontColor: user.SiteDesign[0]?.secondaryFontColor || "#666666",
-        primaryFontFamily: user.SiteDesign[0]?.primaryFontFamily || "Arial",
-        secondaryFontFamily: user.SiteDesign[0]?.secondaryFontFamily || "Arial",
-        presentations: presentations.map((presentation: any) => ({
-          presentationTitle: presentation.presentationTitle,
-          presentationLink: presentation.presentationLink,
-          presentationDescription: presentation.presentationDescription,
-          dateOfPresentation: presentation.dateOfPresentation,
-        })),
-      },
-    },
+    props: {},
   };
 };
-export default Home;
