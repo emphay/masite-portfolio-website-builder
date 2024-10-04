@@ -20,6 +20,7 @@ const ArticlesPage: React.FC = () => {
     secondaryFontColor: "#000000" // Default or placeholder value
   });
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchArticleData = async () => {
@@ -32,16 +33,32 @@ const ArticlesPage: React.FC = () => {
 
         console.log("Data:", data);
         setLoading(false);
-        setArticleData({
+        setUserId(data.id);
+        setArticleData((prevArticleData) => ({
+          ...prevArticleData,
           id: data.id,
-          articleThumbnail: data.ArticleConfig[0].articleThumbnail,
-          articleDisplayLayout: data.ArticleConfig[0].articleDisplayLayout,
-          articleFeedLink: data.ArticleConfig[0].articleFeedLink,
-          primaryFontColor: data.SiteDesign[0].primaryFontColor,
-          secondaryFontColor: data.SiteDesign[0].secondaryFontColor,
-          primaryFontFamily: data.SiteDesign[0].primaryFontFamily,
-          secondaryFontFamily: data.SiteDesign[0].secondaryFontFamily,
-        });
+          articleThumbnail: data.ArticleConfig && data.ArticleConfig.length > 0
+            ? data.ArticleConfig[0].articleThumbnail || prevArticleData.articleThumbnail
+            : prevArticleData.articleThumbnail,
+          articleDisplayLayout: data.ArticleConfig && data.ArticleConfig.length > 0
+            ? data.ArticleConfig[0].articleDisplayLayout || prevArticleData.articleDisplayLayout
+            : prevArticleData.articleDisplayLayout,
+          articleFeedLink: data.ArticleConfig && data.ArticleConfig.length > 0
+            ? data.ArticleConfig[0].articleFeedLink || prevArticleData.articleFeedLink
+            : prevArticleData.articleFeedLink,
+          primaryFontColor: data.SiteDesign && data.SiteDesign.length > 0
+            ? data.SiteDesign[0]?.primaryFontColor || prevArticleData.primaryFontColor
+            : prevArticleData.primaryFontColor,
+          secondaryFontColor: data.SiteDesign && data.SiteDesign.length > 0
+            ? data.SiteDesign[0]?.secondaryFontColor || prevArticleData.secondaryFontColor
+            : prevArticleData.secondaryFontColor,
+          primaryFontFamily: data.SiteDesign && data.SiteDesign.length > 0
+            ? data.SiteDesign[0]?.primaryFontFamily || prevArticleData.primaryFontFamily
+            : prevArticleData.primaryFontFamily,
+          secondaryFontFamily: data.SiteDesign && data.SiteDesign.length > 0
+            ? data.SiteDesign[0]?.secondaryFontFamily || prevArticleData.secondaryFontFamily
+            : prevArticleData.secondaryFontFamily,
+        }));
       } catch (error) {
         console.error("Error fetching articles data:", error);
       }
@@ -53,7 +70,7 @@ const ArticlesPage: React.FC = () => {
   const saveArticleConfig = async (articleConfig: ArticlesConfig) => {
     try {
       const filteredArticleData = {
-        id: articleConfig.id,
+        id: userId,
         articleDisplayLayout: articleConfig.articleDisplayLayout,
         articleThumbnail: articleConfig.articleThumbnail,
         articleFeedLink: articleConfig.articleFeedLink,

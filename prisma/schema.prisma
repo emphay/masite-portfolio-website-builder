@@ -28,15 +28,14 @@ model User {
   links           Link[]
   projects        Project[]
   presentations   Presentation[]
-  Session         Session[]
   SiteDesign      SiteDesign[]
   ArticleConfig   ArticleConfig[]
-  Account         Account?
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 }
 
 model SiteDesign {
+  id                   String   @id @default(cuid())
   userId              String @unique
   accentColor         String?
   backgroundColor     String?
@@ -58,41 +57,6 @@ model ArticleConfig {
   articleDisplayLayout String?
   articleFeedLink String?
   user                User         @relation(fields: [userId], references: [id])
-
-  @@index([userId])
-}
-model Account {
-  id                       String  @id @default(cuid())
-  userId                   String  @unique
-  type                     String
-  provider                 String
-  providerAccountId        String
-  refresh_token            String? @db.Text
-  access_token             String? @db.Text
-  expires_at               Int?
-  token_type               String?
-  scope                    String?
-  id_token                 String? @db.Text
-  session_state            String?
-  refresh_token_expires_in Int?
-  user                     User?   @relation(fields: [userId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([provider, providerAccountId])
-  @@index([userId])
-}
-
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
   @@index([userId])
 }

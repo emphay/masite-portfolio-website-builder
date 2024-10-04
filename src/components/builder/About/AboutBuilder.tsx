@@ -28,6 +28,9 @@ const AboutBuilder: React.FC<{
   setAboutConfig: React.Dispatch<React.SetStateAction<AboutConfig>>;
   saveAboutConfig: (config: AboutConfig) => void;
 }> = ({ config, setAboutConfig, saveAboutConfig }) => {
+
+  console.log("About Config: ", config);
+
   const handleSocialMediaLinks = (platform: string, username: string) => {
     let newLink = "";
     switch (platform) {
@@ -97,11 +100,6 @@ const AboutBuilder: React.FC<{
       if (responseData.result && responseData.result.url) {
         const imageUrl = responseData.result.url;
         setAboutConfig(prev => ({ ...prev, image: imageUrl }));
-
-        // Update fileList to show the uploaded image
-        setFileList(prev => [
-          { uid: "-1", url: imageUrl, name: "image" },
-        ]);
         message.success("File uploaded successfully");
       } else {
         message.error("Failed to get URLs from response");
@@ -115,35 +113,6 @@ const AboutBuilder: React.FC<{
   const handleUpdateInfo = () => {
     saveAboutConfig(config);
   };
-
-  const [instagramUsername, setInstagramUsername] = useState(
-    extractUsername(config.instagramLink)
-  );
-  const [linkedinUsername, setLinkedinUsername] = useState(
-    extractUsername(config.linkedinLink)
-  );
-  const [githubUsername, setGithubUsername] = useState(
-    extractUsername(config.githubLink)
-  );
-  const [youtubeUsername, setYoutubeUsername] = useState(
-    extractUsername(config.youtubeLink)
-  );
-
-  useEffect(() => {
-    handleSocialMediaLinks("Instagram", instagramUsername);
-  }, [instagramUsername]);
-
-  useEffect(() => {
-    handleSocialMediaLinks("LinkedIn", linkedinUsername);
-  }, [linkedinUsername]);
-
-  useEffect(() => {
-    handleSocialMediaLinks("Github", githubUsername);
-  }, [githubUsername]);
-
-  useEffect(() => {
-    handleSocialMediaLinks("YouTube", youtubeUsername);
-  }, [youtubeUsername]);
 
   const [fileList, setFileList] = useState<UploadFile[]>([
     { uid: "-1", url: config.image, name: "image" },
@@ -160,6 +129,10 @@ const AboutBuilder: React.FC<{
     }
   };
 
+  useEffect(() => {
+    setFileList([{ uid: "-1", url: config.image, name: "image" }]);
+  }, [config.image]);
+
   return (
     <div
       style={{
@@ -169,19 +142,12 @@ const AboutBuilder: React.FC<{
         padding: "20px",
         height: "100vh",
         overflowY: "auto",
-        scrollBehavior: "smooth",
         position: "fixed",
         right: "0"
       }}
     >
       <h1 style={{ fontSize: "20px" }}>About</h1>
-      <div
-        style={{
-          border: "1px solid #eee",
-          padding: "10px 20px",
-          marginTop: "30px",
-        }}
-      >
+      <div style={{ border: "1px solid #eee", padding: "10px 20px", marginTop: "30px" }}>
         <h3>Basic Information</h3>
         <p>Profile Image</p>
         <Form>
@@ -221,37 +187,31 @@ const AboutBuilder: React.FC<{
           }}
         />
       </div>
-      <div
-        style={{
-          border: "1px solid #eee",
-          padding: "10px 20px",
-          marginTop: "30px",
-        }}
-      >
+      <div style={{ border: "1px solid #eee", padding: "10px 20px", marginTop: "30px" }}>
         <h3>Social Links</h3>
         <p>Instagram</p>
         <Input
           placeholder="@username"
-          value={instagramUsername}
-          onChange={(e) => setInstagramUsername(e.target.value)}
+          value={extractUsername(config.instagramLink)}
+          onChange={(e) => handleSocialMediaLinks("Instagram", e.target.value)}
         />
         <p>LinkedIn</p>
         <Input
           placeholder="username"
-          value={linkedinUsername}
-          onChange={(e) => setLinkedinUsername(e.target.value)}
+          value={extractUsername(config.linkedinLink)}
+          onChange={(e) => handleSocialMediaLinks("LinkedIn", e.target.value)}
         />
         <p>GitHub</p>
         <Input
           placeholder="username"
-          value={githubUsername}
-          onChange={(e) => setGithubUsername(e.target.value)}
+          value={extractUsername(config.githubLink)}
+          onChange={(e) => handleSocialMediaLinks("Github", e.target.value)}
         />
         <p>YouTube</p>
         <Input
           placeholder="@username"
-          value={youtubeUsername}
-          onChange={(e) => setYoutubeUsername(e.target.value)}
+          value={extractUsername(config.youtubeLink)}
+          onChange={(e) => handleSocialMediaLinks("YouTube", e.target.value)}
         />
       </div>
       <div>

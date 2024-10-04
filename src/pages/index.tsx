@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { getSession, useSession } from "next-auth/react";
 import { GetServerSidePropsContext } from "next";
 import styles from "@/styles/Home.module.css";
-import { Layout, Button, Spin, Space, Dropdown, Menu } from "antd";
+import { Layout, Button, Spin, Space, Dropdown, Menu, message } from "antd";
 import { PhoneOutlined, MailOutlined, WhatsAppOutlined } from "@ant-design/icons";
 import Navigation from "@/components/builder/Nav/Navigation";
 import About from "@/components/builder/About/About";
@@ -32,7 +32,7 @@ const inter = Inter({ subsets: ["latin"] });
 const { Sider, Content } = Layout;
 
 export default function Home() {
-  //const { data: session, status } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
 
   const [designData, setDesignData] = useState<SiteDesignConfig | undefined>(undefined);
@@ -47,6 +47,9 @@ export default function Home() {
     const fetchDesignData = async () => {
       // if (!session) {
       //   console.error("User session is not available");
+      //   message.error("You are not signed in");
+      //   message.info("Redirecting.....");
+      //   router.push("/signin");
       //   return;
       // }
 
@@ -64,6 +67,7 @@ export default function Home() {
         const contact = data.links.find((link: { icon: string }) => link.icon === "Contacts") || {};
 
         setDesignData({
+          id: data.id,
           accentColor: siteDesign.accentColor,
           backgroundColor: siteDesign.backgroundColor,
           primaryFontColor: siteDesign.primaryFontColor,
@@ -189,6 +193,7 @@ export default function Home() {
 
   if (!designData || !navData || !aboutData || !articlesData || !projectsData || !presentationData) {
     return <div>Error loading data. Kindly Add Data</div>;
+
   }
 
   let contactIcon;

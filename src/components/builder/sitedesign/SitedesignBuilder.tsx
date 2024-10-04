@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import styles from "@/styles/sitebuilder.module.css";
 
 export interface SiteDesignConfig {
+  id: string;
   accentColor: string;
   backgroundColor: string;
   primaryFontColor: string;
@@ -18,14 +19,16 @@ const SitedesignBuilder: React.FC<{
 }> = ({ config, setSiteDesignConfig, saveSiteDesignConfig }) => {
   const [fontOptions, setFontOptions] = useState<{ label: string; value: string }[]>([]);
 
+  console.log("Site Design Config: ", config);
+
   useEffect(() => {
     fetch("/api/fonts")
       .then((response) => response.json())
       .then((data) => {
         const fonts = data.fonts || [];
         const formattedFonts = fonts.map((font: string) => ({
-          label: font.replace(/"/g, ""), // Clean label for display
-          value: font.replace(/"/g, ""), // Value to be used in styles
+          label: font.replace(/"/g, ""),
+          value: font.replace(/"/g, ""),
         }));
         setFontOptions(formattedFonts);
       })

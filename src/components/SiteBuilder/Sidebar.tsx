@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Layout, Menu } from "antd";
 import { WalletOutlined, AppstoreOutlined } from "@ant-design/icons";
 import { signOut, useSession } from "next-auth/react";
@@ -11,6 +11,8 @@ const { Sider } = Layout;
 const Sidebar: React.FC<{ session: any }> = ({ session }) => {
   const { asPath } = useRouter(); // Get the current route
   const [openKeys, setOpenKeys] = useState<string[]>([]);
+  const [fullName, setFullName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
 
   // Determine the active menu key based on the current route
   const getSelectedKey = () => {
@@ -22,6 +24,28 @@ const Sidebar: React.FC<{ session: any }> = ({ session }) => {
     return "siteDesign"; // Default key
   };
 
+  const fetchProfileData = async () => {
+    try {
+      const response = await fetch("/api/getProfile");
+      if (!response.ok) {
+        throw new Error("Failed to fetch profile data");
+      }
+      const data = await response.json();
+      console.log("Data: ", data);
+
+      const name = `${data.FirstName || ""} ${data.LastName || ""}`.trim();
+      const email = data.email;
+      setFullName(name);
+      setEmail(email);
+    } catch (error) {
+      console.error("Error fetching profile data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchProfileData();
+  }, []);
+
   // Determine which submenu to open based on the current route
   const determineOpenKeys = () => {
     const sectionKeys = ["navigation", "about", "articles", "projects", "presentations"];
@@ -32,14 +56,17 @@ const Sidebar: React.FC<{ session: any }> = ({ session }) => {
   const handleOpenChange = (keys: string[]) => {
     setOpenKeys(keys);
   };
+  const handleSignOut = async () => {
+    await signOut({ redirect: true, callbackUrl: '/signin' });
+  };
 
   return (
     <Sider className={styles.siderContainer} width={300} theme="light" style={{ position: "fixed", height: "100vh" }}>
       <img src="https://ik.imagekit.io/mrinalprakash4577/logo.png" height="40px" width="40px" alt="User Avatar" />
-      <h4 onClick={() => signOut()}>
-        {session?.user?.name.split(' ')[0]}
+      <h4 onClick={handleSignOut} style={{ cursor: "pointer" }}>
+        {fullName}
       </h4>
-      <p style={{ marginTop: "-12px" }}>{session?.user?.email}</p>
+      <p style={{ marginTop: "-12px" }}>{email}</p>
       <Menu
         mode="inline"
         selectedKeys={[getSelectedKey()]} // Use getSelectedKey to set the active key

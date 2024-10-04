@@ -14,7 +14,7 @@ export default async function handler(
   const { id, articleThumbnail, articleDisplayLayout, articleFeedLink } =
       req.body;
 
-  const userId = id;
+  const userId = req.body.id;
 
   if (req.method === "GET") {
     try {
