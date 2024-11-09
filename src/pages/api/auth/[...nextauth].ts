@@ -8,51 +8,48 @@ import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 export const authOptions: AuthOptions = {
     adapter: PrismaAdapter(prisma),
-    providers: [
-        CredentialsProvider({
-            name: 'Credentials',
-            credentials: {
-                username: { label: "Username", type: "text", placeholder: "jsmith" },
-                password: { label: "Password", type: "password" }
-            },
-            async authorize(credentials, req) {
-                if (credentials) {
-                    const userWithPassword = await prisma.user.findUnique({
-                        select: {
-                            id: true,
-                            FirstName: true,
-                            LastName: true,
-                            email: true,
-                            password: true
-                        },
-                        where: {
-                            username: credentials.username
-                        }
-                    });
-
-                    if (userWithPassword && userWithPassword.password) {
-                        const compareResult = bcrypt.compareSync(credentials.password, userWithPassword.password);
-                        if (compareResult) {
-                            console.log('Passwords match! User authenticated.');
-                            return {
-                                id: userWithPassword.id,
-                                name: `${userWithPassword.FirstName ?? ''} ${userWithPassword.LastName ?? ''}`,
-                                username: credentials.username,
-                                email: userWithPassword.email ?? "" // Use empty string if email is null
-                            };
-                        } else {
-                            console.log('Passwords do not match! Authentication failed.');
-                            return null;
-                        }
+    providers: [CredentialsProvider({
+        name: 'Credentials',
+        credentials: {
+            username: { label: "Username", type: "text", placeholder: "jsmith" },
+            password: { label: "Password", type: "password" }
+        },
+        async authorize(credentials, req) {
+            if (credentials) {
+                const userWithPassword = await prisma.user.findUnique({
+                    select: {
+                        id: true,
+                        FirstName: true,
+                        LastName: true,
+                        email: true,
+                        password: true
+                    },
+                    where: {
+                        username: credentials.username
+                    }
+                });
+                if (userWithPassword) {
+                    const compareResult = bcrypt.compareSync(credentials.password, userWithPassword.password);
+                    if (compareResult) {
+                        console.log('Passwords match! User authenticated.');
+                        return {
+                            id: userWithPassword.id,
+                            name: `${userWithPassword.FirstName} ${userWithPassword.LastName}`,
+                            username: credentials?.username,
+                            email: userWithPassword?.email || ""
+                        };
                     } else {
-                        return null; // No user or password not set
+                        console.log('Passwords do not match! Authentication failed.');
+                        return null;
                     }
                 } else {
-                    return null; // No credentials provided
+                    return null;
                 }
+            } else {
+                return null;
             }
-        })
-    ],
+        }
+    })],
     session: {
         strategy: "jwt",
     },
@@ -61,15 +58,18 @@ export const authOptions: AuthOptions = {
             if (user) {
                 token.name = user.name;
                 token.id = user.id;
-                token.email = user.email;
+                token.email = user.email
+                
             }
             return token;
         },
         async session({ session, token }) {
+         
             if (token) {
                 session.id = token.id;
                 session.email = token.email;
                 session.name = token.name;
+                
             }
             return session;
         }

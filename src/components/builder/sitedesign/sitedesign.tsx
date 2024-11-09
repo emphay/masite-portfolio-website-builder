@@ -31,6 +31,7 @@ interface SiteDesignPageProps {
   articlesData: ArticlesConfig;
   presentationData: PresentationConfig;
 }
+
 const contactIconMapping: Record<string, React.ReactNode> = {
   WhatsApp: <WhatsAppOutlined />,
   Telegram: (

@@ -9,7 +9,6 @@ const ProjectsPage: React.FC = () => {
   const { data: session } = useSession();
   const [projectsData, setProjectsData] = useState<ProjectsConfig | undefined>(undefined);
   const [loading, setLoading] = useState(true);
-  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProjectsData = async () => {
@@ -20,20 +19,18 @@ const ProjectsPage: React.FC = () => {
         }
         const data = await response.json();
 
-        console.log("Data:", data);
-        setUserId(data.id);
-
+        //  console.log("Data:", data);
+        setLoading(false);
         const siteDesign = data.SiteDesign && data.SiteDesign.length > 0 ? data.SiteDesign[0] : {};
         const githubLink = data.links.find((link: any) => link.title === "Github")?.url || "";
 
-        setProjectsData((prevProjectsData) => ({
-          ...prevProjectsData,
+        const proj = {
           id: data.id,
           projectDisplayLayout: siteDesign.projectDisplayLayout || "card",
           githubLink: githubLink,
-          secondaryFontColor: siteDesign.secondaryFontColor || prevProjectsData?.secondaryFontColor,
-          primaryFontFamily: siteDesign.primaryFontFamily || prevProjectsData?.primaryFontFamily,
-          secondaryFontFamily: siteDesign.secondaryFontFamily || prevProjectsData?.secondaryFontFamily,
+          primaryFontFamily: siteDesign.primaryFontFamily,
+          secondaryFontColor: siteDesign.secondaryFontColor,
+          secondaryFontFamily: siteDesign.secondaryFontFamily,
           projects: data.projects.map((project: any) => ({
             id: project.id,
             projectTitle: project.projectTitle,
@@ -41,10 +38,12 @@ const ProjectsPage: React.FC = () => {
             projectLink: project.projectLink,
             isVisible: project.isVisible,
           })),
-          handleProjectsConfigUpdate: (newConfig: ProjectsConfig) => setProjectsData(newConfig),
-        }));
+          handleProjectsConfigUpdate: (newConfig: ProjectsConfig) => setProjectsData(newConfig), // Include this method
+        };
 
-        setLoading(false);
+        // console.log("Hello World: ", proj);
+        setProjectsData(proj);
+
       } catch (error) {
         console.error("Error fetching profile data:", error);
       }
@@ -57,7 +56,6 @@ const ProjectsPage: React.FC = () => {
     try {
       const { id, projects, projectDisplayLayout } = projectsConfig;
 
-      console.log("ID= ", id);
       console.log('The Projects are: ', projects);
       console.log('Project Display Layout: ', projectDisplayLayout);
 
@@ -88,30 +86,25 @@ const ProjectsPage: React.FC = () => {
     }
   };
 
+
   return (
     <SiteBuilderLayout>
-      {loading ? (
-        <Spin
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "100vh",
-            width: "100vw",
-          }}
-        />
-      ) : (
-        projectsData && (
-          <>
-            <Projects config={projectsData} />
-            <ProjectsBuilder
-              config={projectsData}
-              setProjectsConfig={setProjectsData}
-              saveProjectsConfig={saveProjectsConfig}
-            />
-          </>
-        )
-      )}
+      {loading && (<Spin
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          width: "100vw",
+        }}
+      />)}
+      {!loading && projectsData && (<>
+        <Projects config={projectsData} />
+        <ProjectsBuilder
+          config={projectsData}
+          setProjectsConfig={setProjectsData}
+          saveProjectsConfig={saveProjectsConfig}
+        /></>)}
     </SiteBuilderLayout>
   );
 };

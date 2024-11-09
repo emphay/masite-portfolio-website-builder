@@ -6,7 +6,6 @@ import { useRouter } from "next/router";
 export default function SignUp() {
 
     const router = useRouter();
-
     const onFinish = (values: any) => {
         console.log('Received values of form: ', values);
         fetch('/api/signup', {
@@ -16,23 +15,15 @@ export default function SignUp() {
             },
             body: JSON.stringify(values),
         })
-            .then(response => {
-                if (response.status === 201) {
-                    message.success("Account has been created successfully");
-                    router.push('/signin');
-                } else if (response.status === 264) {
-                    message.error("Account already exists");
-                    router.push('/signin');
-                } else {
-                    return response.json().then((data) => {
-                        throw new Error(data.error || 'A User is Already Existing. Kindly Sign In');
-                        router.push('/signin');
-                    });
-                }
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                message.success("Account has been created Successfully");
+                router.push('/signin');
             })
             .catch((error) => {
                 console.error('Error:', error);
-                message.error(error.message || "Error in creating your account");
+                message.error("Error in creating your account");
             });
     };
 
@@ -44,7 +35,6 @@ export default function SignUp() {
             className={styles.signupForm}
         >
             <h1 className={styles.formTitle}>Sign Up to Masite</h1>
-
             <Form.Item
                 name="username"
                 rules={[{ required: true, message: 'Please input your username!' }]}

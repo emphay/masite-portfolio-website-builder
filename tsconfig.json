@@ -5,6 +5,8 @@
       "dom.iterable",
       "esnext"
     ],
+    "allowSyntheticDefaultImports": true,
+    "target": "es6",
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,

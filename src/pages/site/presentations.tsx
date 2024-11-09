@@ -9,7 +9,6 @@ const PresentationsPage: React.FC = () => {
   const { data: session } = useSession();
   const [presentationData, setPresentationData] = useState<PresentationConfig | undefined>(undefined);
   const [loading, setLoading] = useState(true);
-  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPresentationData = async () => {
@@ -20,35 +19,31 @@ const PresentationsPage: React.FC = () => {
         }
         const data = await response.json();
 
-        console.log("Data:", data);
-        setUserId(data.id);
+        // console.log("Data:", data);
 
         const siteDesign = data.SiteDesign && data.SiteDesign.length > 0 ? data.SiteDesign[0] : {};
 
-        // const presentations: Presentation[] = data.presentations.map((presentation: any) => ({
-        //   presentationTitle: presentation.presentationTitle || "",
-        //   presentationLink: presentation.presentationLink || "",
-        //   presentationDescription: presentation.presentationDescription || "",
-        //   dateOfPresentation: presentation.dateOfPresentation ? new Date(presentation.dateOfPresentation) : null,
-        // }));
+        const presentations: Presentation[] = data.presentations.map((presentation: any) => ({
+          presentationTitle: presentation.presentationTitle || "",
+          presentationLink: presentation.presentationLink || "",
+          presentationDescription: presentation.presentationDescription || "",
+          dateOfPresentation: presentation.dateOfPresentation ? new Date(presentation.dateOfPresentation) : null,
+        }));
 
-        setPresentationData((prevPresentationData) => ({
-          ...prevPresentationData,
+        const presentConfig: PresentationConfig = {
           id: data.id,
           presentationDisplayLayout: siteDesign.presentationDisplayLayout || "Grid",
           presentationThumbnail: siteDesign.presentationThumbnail || "OFF",
-          primaryFontColor: data.SiteDesign[0]?.primaryFontColor || prevPresentationData?.primaryFontColor,
-          secondaryFontColor: data.SiteDesign[0]?.secondaryFontColor || prevPresentationData?.secondaryFontColor,
-          primaryFontFamily: data.SiteDesign[0]?.primaryFontFamily || prevPresentationData?.primaryFontFamily,
-          secondaryFontFamily: data.SiteDesign[0]?.secondaryFontFamily || prevPresentationData?.secondaryFontFamily,
-          presentations: data.presentations.map((presentation: any) => ({
-            presentationTitle: presentation.presentationTitle || "",
-            presentationLink: presentation.presentationLink || "",
-            presentationDescription: presentation.presentationDescription || "",
-            dateOfPresentation: presentation.dateOfPresentation ? new Date(presentation.dateOfPresentation) : null,
-          })),
-        }));
+          primaryFontColor: data.SiteDesign[0].primaryFontColor,
+          secondaryFontColor: data.SiteDesign[0].secondaryFontColor,
+          primaryFontFamily: data.SiteDesign[0].primaryFontFamily,
+          secondaryFontFamily: data.SiteDesign[0].secondaryFontFamily,
+          presentations,
+        };
 
+        // console.log("Hello World: ", presentConfig);
+
+        setPresentationData(presentConfig);
       } catch (error) {
         console.error("Error fetching presentation data:", error);
       } finally {
@@ -65,7 +60,7 @@ const PresentationsPage: React.FC = () => {
 
       for (const presentation of presentationConfig.presentations) {
         const singlePresentationConfig = {
-          id: userId,
+          id: presentationConfig.id,
           presentationDisplayLayout: presentationConfig.presentationDisplayLayout,
           presentationThumbnail: presentationConfig.presentationThumbnail,
           ...presentation,

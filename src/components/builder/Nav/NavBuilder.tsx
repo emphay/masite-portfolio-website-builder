@@ -53,9 +53,8 @@ const NavBuilder: React.FC<{
   setNavConfig: React.Dispatch<React.SetStateAction<NavConfig>>;
   saveNavConfig: (navConfig: NavConfig) => void;
 }> = ({ config, setNavConfig, saveNavConfig }) => {
-
+  // const [navData, setNavData] = useState<NavConfig>(config);
   const [selectedContact, setSelectedContact] = useState(config.contactType);
-  console.log("Nav Config: ", config);
 
   const handleChange = (value: string) => {
     setSelectedContact(value);

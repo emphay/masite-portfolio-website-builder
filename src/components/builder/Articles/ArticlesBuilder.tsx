@@ -32,7 +32,6 @@ const ArticlesBuilder: React.FC<{
   const [thumbnailSwitch, setThumbnailSwitch] = useState<boolean>(false);
   // Change type here from string to 'Grid' | 'Card'
   const [layout, setLayout] = useState<'Grid' | 'Card'>('Grid');
-  console.log("Articles Config: ", config);
 
   useEffect(() => {
     // Set the initial state based on the config

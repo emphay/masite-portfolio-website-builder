@@ -25,13 +25,11 @@ export default async function handler(
       github,
       linkedin,
     } = req.body;
-    console.log('Request Body:', req.body);
-    const userId = req.body.id; 
 
     try {
       const result = await prisma.$transaction(async (prisma) => {
         const user = await prisma.user.update({
-          where: { id: userId },
+          where: { id: id },
           data: {
             image: image,
             displayName: displayName,

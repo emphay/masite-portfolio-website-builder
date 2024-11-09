@@ -1,3 +1,5 @@
+// pages/api/articleconfig.ts
+
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "./auth/[...nextauth]";
@@ -11,10 +13,11 @@ export default async function handler(
 ) {
   const session = await getServerSession(req, res, authOptions);
 
-  const { id, articleThumbnail, articleDisplayLayout, articleFeedLink } =
-      req.body;
+  if (!session) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
 
-  const userId = id;
+  const userId = session.id;
 
   if (req.method === "GET") {
     try {
@@ -33,13 +36,14 @@ export default async function handler(
       console.error("Failed to retrieve article configuration:", error);
       res.status(500).json({
         message: "Failed to retrieve article configuration",
-        error: (error as Error).message, // Type assertion
+        error: (error as Error).message,
       });
     } finally {
       await prisma.$disconnect();
     }
-  } else if (req.method === "PUT") {
-    
+  } else if (req.method === "POST") {
+    const { articleThumbnail, articleDisplayLayout, articleFeedLink } =
+      req.body;
 
     try {
       let articleConfig = await prisma.articleConfig.findUnique({
@@ -71,7 +75,7 @@ export default async function handler(
       console.error("Failed to update article configuration:", error);
       res.status(500).json({
         message: "Failed to update article configuration",
-        error: (error as Error).message, // Type assertion
+        error: (error as Error).message,
       });
     } finally {
       await prisma.$disconnect();
