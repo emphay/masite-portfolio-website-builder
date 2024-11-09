@@ -78,7 +78,7 @@ const AboutBuilder: React.FC<{
 
   const [form] = Form.useForm();
   const [tempLink, setTempLink] = useState<string>("");
-  const [s3Link, setS3Link] = useState<string>("");
+  const [s3Link, setS3Link] = useState<string>(config.image || "");
 
   const handleFileUpload = async (file: RcFile) => {
     try {
@@ -123,9 +123,8 @@ const AboutBuilder: React.FC<{
     }
   };
 
-
   const [fileList, setFileList] = useState<UploadFile[]>([
-    { uid: "-1", url: s3Link, name: "image" },
+    { uid: "-1", url: s3Link || config.image, name: "image" }, // Use the existing config.image if available
   ]);
 
   const handleImageUpload = ({ fileList: newFileList }: { fileList: UploadFile[] }) => {
@@ -164,7 +163,6 @@ const AboutBuilder: React.FC<{
   useEffect(() => {
     handleSocialMediaLinks("YouTube", youtubeUsername);
   }, [youtubeUsername]);
-
 
   return (
     <div
