@@ -13,6 +13,7 @@
     "@prisma/client": "^5.14.0",
     "antd": "^5.18.3",
     "antd-img-crop": "^4.22.0",
+    "aws-sdk": "^2.1692.0",
     "bcrypt": "^5.1.1",
     "dayjs": "^1.11.12",
     "font-list": "^1.5.1",

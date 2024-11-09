@@ -28,9 +28,6 @@ const AboutBuilder: React.FC<{
   setAboutConfig: React.Dispatch<React.SetStateAction<AboutConfig>>;
   saveAboutConfig: (config: AboutConfig) => void;
 }> = ({ config, setAboutConfig, saveAboutConfig }) => {
-
-  console.log("About Config: ", config);
-
   const handleSocialMediaLinks = (platform: string, username: string) => {
     let newLink = "";
     switch (platform) {
@@ -79,59 +76,95 @@ const AboutBuilder: React.FC<{
     }
   };
 
-  const uploadImage = async (file: RcFile) => {
-    const formData = new FormData();
-    formData.append("file", file);
-    console.log("Uploading file:", file); // Debug log
+  const [form] = Form.useForm();
+  const [tempLink, setTempLink] = useState<string>("");
+  const [s3Link, setS3Link] = useState<string>("");
 
+  const handleFileUpload = async (file: RcFile) => {
     try {
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
+      const tempUrl = URL.createObjectURL(file);
+      setTempLink(tempUrl);
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64 = reader.result?.toString().split(",")[1];
 
-      const responseData = await response.json();
-      console.log("Server response:", responseData);
+        const response = await fetch("/api/uploadProfileImage", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            file: base64,
+            fileName: file.name,
+          }),
+        });
 
-      if (responseData.result && responseData.result.url) {
-        const imageUrl = responseData.result.url;
-        setAboutConfig(prev => ({ ...prev, image: imageUrl }));
-        message.success("File uploaded successfully");
-      } else {
-        message.error("Failed to get URLs from response");
-      }
+        if (response.ok) {
+          const data = await response.json();
+          const newS3Link = data.url;
+
+          setS3Link(newS3Link);
+
+          setFileList(prev => [
+            { uid: "-1", url: newS3Link, name: "image" },
+          ]);
+          setAboutConfig(prev => ({ ...prev, image: newS3Link }));
+
+          message.success("File uploaded to S3 successfully");
+        } else {
+          throw new Error("Failed to upload file");
+        }
+      };
+      reader.readAsDataURL(file);
     } catch (error) {
-      message.error("File upload failed");
       console.error("Error uploading file:", error);
+      message.error("File upload failed");
     }
   };
 
-  const handleUpdateInfo = () => {
-    saveAboutConfig(config);
-  };
 
   const [fileList, setFileList] = useState<UploadFile[]>([
-    { uid: "-1", url: config.image, name: "image" },
+    { uid: "-1", url: s3Link, name: "image" },
   ]);
 
   const handleImageUpload = ({ fileList: newFileList }: { fileList: UploadFile[] }) => {
     setFileList(newFileList);
   };
 
-  const customRequest = async (options: UploadRequestOption) => {
-    const { file } = options;
-    if (file) {
-      await uploadImage(file as RcFile);
-    }
+  const handleUpdateInfo = () => {
+    saveAboutConfig(config);
   };
 
+  const [instagramUsername, setInstagramUsername] = useState(
+    extractUsername(config.instagramLink)
+  );
+  const [linkedinUsername, setLinkedinUsername] = useState(
+    extractUsername(config.linkedinLink)
+  );
+  const [githubUsername, setGithubUsername] = useState(
+    extractUsername(config.githubLink)
+  );
+  const [youtubeUsername, setYoutubeUsername] = useState(
+    extractUsername(config.youtubeLink)
+  );
+
   useEffect(() => {
-    setFileList([{ uid: "-1", url: config.image, name: "image" }]);
-  }, [config.image]);
+    handleSocialMediaLinks("Instagram", instagramUsername);
+  }, [instagramUsername]);
+
+  useEffect(() => {
+    handleSocialMediaLinks("LinkedIn", linkedinUsername);
+  }, [linkedinUsername]);
+
+  useEffect(() => {
+    handleSocialMediaLinks("Github", githubUsername);
+  }, [githubUsername]);
+
+  useEffect(() => {
+    handleSocialMediaLinks("YouTube", youtubeUsername);
+  }, [youtubeUsername]);
+
 
   return (
     <div
@@ -142,19 +175,26 @@ const AboutBuilder: React.FC<{
         padding: "20px",
         height: "100vh",
         overflowY: "auto",
+        scrollBehavior: "smooth",
         position: "fixed",
         right: "0"
       }}
     >
       <h1 style={{ fontSize: "20px" }}>About</h1>
-      <div style={{ border: "1px solid #eee", padding: "10px 20px", marginTop: "30px" }}>
+      <div
+        style={{
+          border: "1px solid #eee",
+          padding: "10px 20px",
+          marginTop: "30px",
+        }}
+      >
         <h3>Basic Information</h3>
         <p>Profile Image</p>
         <Form>
           <Form.Item name="imageUrl">
             <ImgCrop rotationSlider>
               <Upload
-                customRequest={customRequest}
+                customRequest={({ file }) => handleFileUpload(file as RcFile)}
                 listType="picture-card"
                 fileList={fileList}
                 onChange={handleImageUpload}
@@ -187,31 +227,37 @@ const AboutBuilder: React.FC<{
           }}
         />
       </div>
-      <div style={{ border: "1px solid #eee", padding: "10px 20px", marginTop: "30px" }}>
+      <div
+        style={{
+          border: "1px solid #eee",
+          padding: "10px 20px",
+          marginTop: "30px",
+        }}
+      >
         <h3>Social Links</h3>
         <p>Instagram</p>
         <Input
           placeholder="@username"
-          value={extractUsername(config.instagramLink)}
-          onChange={(e) => handleSocialMediaLinks("Instagram", e.target.value)}
+          value={instagramUsername}
+          onChange={(e) => setInstagramUsername(e.target.value)}
         />
         <p>LinkedIn</p>
         <Input
           placeholder="username"
-          value={extractUsername(config.linkedinLink)}
-          onChange={(e) => handleSocialMediaLinks("LinkedIn", e.target.value)}
+          value={linkedinUsername}
+          onChange={(e) => setLinkedinUsername(e.target.value)}
         />
         <p>GitHub</p>
         <Input
           placeholder="username"
-          value={extractUsername(config.githubLink)}
-          onChange={(e) => handleSocialMediaLinks("Github", e.target.value)}
+          value={githubUsername}
+          onChange={(e) => setGithubUsername(e.target.value)}
         />
         <p>YouTube</p>
         <Input
           placeholder="@username"
-          value={extractUsername(config.youtubeLink)}
-          onChange={(e) => handleSocialMediaLinks("YouTube", e.target.value)}
+          value={youtubeUsername}
+          onChange={(e) => setYoutubeUsername(e.target.value)}
         />
       </div>
       <div>
