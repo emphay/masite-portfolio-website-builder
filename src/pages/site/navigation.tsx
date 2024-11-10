@@ -3,11 +3,12 @@ import Navigation from "../../components/builder/Nav/Navigation";
 import { useSession } from "next-auth/react";
 import NavBuilder, { NavConfig } from "@/components/builder/Nav/NavBuilder";
 import SiteBuilderLayout from "../../components/Layouts/SiteBuilderLayout";
-import { Spin } from 'antd';
+import { message, Spin } from 'antd';
 import { NextPage } from "next";
 
 const NavigationPage: NextPage = () => {
   const { data: session } = useSession();
+  const [userId, setUserId] = useState<string | null>(null);
 
   const [navData, setNavData] = useState<NavConfig>({
     id: "",
@@ -40,39 +41,33 @@ const NavigationPage: NextPage = () => {
       //     firstName: data.firstName,
       //     lastName: data.lastName
       // })
-      // console.log("Data: ", data);
+      console.log("Data: ", data);
       setLoading(false);
+      setUserId(data.id);
 
       const contact =
         data.links.filter(
           (link: { icon: string }) => link.icon === "Contacts"
         ) || [];
 
-      setNavData({
-        id: data.id,
-        firstName: data.FirstName,
-        lastName: data.LastName,
-        aboutText:
-          data.links.find((link: any) => link.url.startsWith("#about"))?.title ||
-          "",
-        contactType: contact[0].title,
-        contactValue: contact[0].url,
-        articleText: data.links.find((link: any) =>
-          link.url.startsWith("#articles")
-        ).title,
-        projectText: data.links.find((link: any) =>
-          link.url.startsWith("#projects")
-        ).title,
-        presentationText: data.links.find((link: any) =>
-          link.url.startsWith("#presentations")
-        ).title,
-        accentColor: data.SiteDesign[0].accentColor,
-        backgroundColor: data.SiteDesign[0].backgroundColor,
-        primaryFontColor: data.SiteDesign[0].primaryFontColor,
-        secondaryFontColor: data.SiteDesign[0].secondaryFontColor,
-        primaryFontFamily: data.SiteDesign[0].primaryFontFamily,
-        secondaryFontFamily: data.SiteDesign[0].secondaryFontFamily,
-      });
+      setNavData((prevNavData) => ({
+        ...prevNavData, // Spread the previous state to keep existing id
+        id: data.id, // Ensure id is set to the fetched data
+        firstName: data.FirstName || prevNavData.firstName, // Update if new data exists
+        lastName: data.LastName || prevNavData.lastName,
+        aboutText: data.links.find((link: any) => link.url.startsWith("#about"))?.title || prevNavData.aboutText,
+        contactType: contact[0]?.title || prevNavData.contactType,
+        contactValue: contact[0]?.url || prevNavData.contactValue,
+        articleText: data.links.find((link: any) => link.url.startsWith("#articles"))?.title || prevNavData.articleText,
+        projectText: data.links.find((link: any) => link.url.startsWith("#projects"))?.title || prevNavData.projectText,
+        presentationText: data.links.find((link: any) => link.url.startsWith("#presentations"))?.title || prevNavData.presentationText,
+        accentColor: data.SiteDesign[0]?.accentColor || prevNavData.accentColor,
+        backgroundColor: data.SiteDesign[0]?.backgroundColor || prevNavData.backgroundColor,
+        primaryFontColor: data.SiteDesign[0]?.primaryFontColor || prevNavData.primaryFontColor,
+        secondaryFontColor: data.SiteDesign[0]?.secondaryFontColor || prevNavData.secondaryFontColor,
+        primaryFontFamily: data.SiteDesign[0]?.primaryFontFamily || prevNavData.primaryFontFamily,
+        secondaryFontFamily: data.SiteDesign[0]?.secondaryFontFamily || prevNavData.secondaryFontFamily,
+      }));
     } catch (error) {
       console.error("Error fetching profile data:", error);
     }
@@ -85,7 +80,7 @@ const NavigationPage: NextPage = () => {
   const saveNavConfig = async (navConfig: NavConfig) => {
     try {
       const filteredNavData = {
-        id: navConfig.id,
+        id: userId,
         firstName: navConfig.firstName,
         lastName: navConfig.lastName,
         aboutText: navConfig.aboutText,
@@ -95,6 +90,7 @@ const NavigationPage: NextPage = () => {
         projectText: navConfig.projectText,
         presentationText: navConfig.presentationText,
       };
+      console.log(filteredNavData);
 
       const response = await fetch("/api/saveNavData", {
         method: "PUT",
@@ -110,6 +106,7 @@ const NavigationPage: NextPage = () => {
 
       const result = await response.json();
       console.log("Profile saved successfully:", result);
+      message.success("Data saved successfully");
     } catch (error) {
       console.error("Error saving profile data:", error);
     }

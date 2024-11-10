@@ -39,9 +39,6 @@ const iconMapping = {
 const About: React.FC<{ config: AboutConfig }> = ({ config }) => {
   const { data: session } = useSession();
 
-  // console.log("Config: ", config);
-  // Assuming config.links is an array of link objects
-
   return (
     <Content>
       <section id="About" className={styles.home} style={{ marginTop: "150px" }}>

@@ -17,14 +17,14 @@ export default async function uploadProfileImage(
     try {
       const { file, fileName } = req.body;
 
-      const buffer = Buffer.from(file, "base64"); // if the file is sent as a base64-encoded string
+      const buffer = Buffer.from(file, "base64"); 
 
       const params = {
         Bucket: process.env.BUCKET_NAME!,
         Key: fileName,
         Body: buffer,
         ContentEncoding: "base64",
-        ContentType: "image/jpeg", // Adjust as necessary
+        ContentType: "image/jpeg", 
       };
 
       const data = await s3.upload(params).promise();

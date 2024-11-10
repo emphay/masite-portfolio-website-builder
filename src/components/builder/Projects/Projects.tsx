@@ -22,8 +22,6 @@ const Projects: React.FC<{ config: ProjectsConfig }> = ({ config }) => {
 
   const visibleProjects = projects.filter((project) => project.isVisible);
 
-  // console.log("Config: ", config);
-
   const getContentStyle = () => {
     const path = router.pathname;
 

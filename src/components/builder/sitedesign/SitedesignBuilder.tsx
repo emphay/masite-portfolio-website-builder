@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import styles from "@/styles/sitebuilder.module.css";
 
 export interface SiteDesignConfig {
+  id: string;
   accentColor: string;
   backgroundColor: string;
   primaryFontColor: string;
@@ -18,13 +19,7 @@ const SitedesignBuilder: React.FC<{
 }> = ({ config, setSiteDesignConfig, saveSiteDesignConfig }) => {
   const [fontOptions, setFontOptions] = useState<{ label: string; value: string }[]>([]);
 
-  // Local state for color pickers to avoid immediate reversion
-  const [localColors, setLocalColors] = useState({
-    accentColor: config.accentColor,
-    backgroundColor: config.backgroundColor,
-    primaryFontColor: config.primaryFontColor,
-    secondaryFontColor: config.secondaryFontColor,
-  });
+  console.log("Site Design Config: ", config);
 
   useEffect(() => {
     fetch("/api/fonts")
@@ -32,27 +27,15 @@ const SitedesignBuilder: React.FC<{
       .then((data) => {
         const fonts = data.fonts || [];
         const formattedFonts = fonts.map((font: string) => ({
-          label: font.replace(/"/g, ""), // Clean label for display
-          value: font.replace(/"/g, ""), // Value to be used in styles
+          label: font.replace(/"/g, ""),
+          value: font.replace(/"/g, ""),
         }));
         setFontOptions(formattedFonts);
       })
       .catch((error) => console.error("Error fetching fonts:", error));
   }, []);
 
-  const handleColorChange = (colorType: keyof SiteDesignConfig) => (color: any) => {
-    const hex = color?.toHexString?.() || color.hex || color;
-
-    console.log("Hex: ", hex);
-    console.log("Config: ", config);
-
-    // Update both local state and global config simultaneously
-    setLocalColors((prevConfig) => ({
-      ...prevConfig,
-      [colorType]: hex,
-    }));
-
-    // Immediately update the global config
+  const handleColorChange = (colorType: keyof SiteDesignConfig) => (color: any, hex: string) => {
     setSiteDesignConfig((prevConfig) => ({
       ...prevConfig,
       [colorType]: hex,
@@ -67,10 +50,7 @@ const SitedesignBuilder: React.FC<{
   };
 
   const updatePreferences = () => {
-    // Combine both local colors and current config to finalize the update
-    const updatedConfig = { ...config, ...localColors };
-    setSiteDesignConfig(updatedConfig);
-    saveSiteDesignConfig(updatedConfig);
+    saveSiteDesignConfig(config);
   };
 
   return (
@@ -83,7 +63,7 @@ const SitedesignBuilder: React.FC<{
         overflowY: "auto",
         scrollBehavior: "smooth",
         position: "fixed",
-        right: "0",
+        right: "0"
       }}
     >
       <h1>Site Design</h1>
@@ -92,7 +72,7 @@ const SitedesignBuilder: React.FC<{
         <div className={styles.colorPicker}>
           <p>Accent</p>
           <ColorPicker
-            value={localColors.accentColor} // Use local state
+            value={config.accentColor}
             onChange={handleColorChange("accentColor")}
             size="small"
           />
@@ -100,7 +80,7 @@ const SitedesignBuilder: React.FC<{
         <div className={styles.colorPicker}>
           <p>Background</p>
           <ColorPicker
-            value={localColors.backgroundColor} // Use local state
+            value={config.backgroundColor}
             onChange={handleColorChange("backgroundColor")}
             size="small"
           />
@@ -108,7 +88,7 @@ const SitedesignBuilder: React.FC<{
         <div className={styles.colorPicker}>
           <p>Primary Font Color</p>
           <ColorPicker
-            value={localColors.primaryFontColor}
+            value={config.primaryFontColor}
             onChange={handleColorChange("primaryFontColor")}
             size="small"
           />
@@ -116,7 +96,7 @@ const SitedesignBuilder: React.FC<{
         <div className={styles.colorPicker}>
           <p>Secondary Font Color</p>
           <ColorPicker
-            value={localColors.secondaryFontColor}
+            value={config.secondaryFontColor}
             onChange={handleColorChange("secondaryFontColor")}
             size="small"
           />
@@ -129,7 +109,7 @@ const SitedesignBuilder: React.FC<{
           <Select
             options={fontOptions.map(font => ({
               ...font,
-              label: <span style={{ fontFamily: font.value }}>{font.label}</span>,
+              label: <span style={{ fontFamily: font.value }}>{font.label}</span>
             }))}
             value={config.primaryFontFamily}
             onChange={handleFontChange("primaryFontFamily")}
@@ -142,7 +122,7 @@ const SitedesignBuilder: React.FC<{
           <Select
             options={fontOptions.map(font => ({
               ...font,
-              label: <span style={{ fontFamily: font.value }}>{font.label}</span>,
+              label: <span style={{ fontFamily: font.value }}>{font.label}</span>
             }))}
             value={config.secondaryFontFamily}
             onChange={handleFontChange("secondaryFontFamily")}

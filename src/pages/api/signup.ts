@@ -1,8 +1,3 @@
-/**
- * Create an API to signup a user, that takes email, username & password and saves in the table UserAccount
- * POST API { email: abc@mail.com, username: u123, password: ****}
- */
-
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -12,23 +7,45 @@ import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+    if (req.method !== 'POST') {
+        return res.status(405).json({ message: 'Method Not Allowed' });
+    }
+
     const { username, email, password } = req.body;
     const saltRounds = 10;
-    //hash the password
-    bcrypt.hash(password, saltRounds, async (err: any, hash: any) => {
+
+    try {
+        const existingUser = await prisma.user.findFirst({
+            where: {
+                OR: [
+                    { email: email },
+                    { username: username }
+                ]
+            }
+        });
+
+        if (existingUser) {
+            return res.status(264).json({ message: 'Email or username already exists' });
+        }
+
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+        // Create the new user
         await prisma.user.create({
             data: {
-                FirstName: username,
-                LastName: username,
+                FirstName: username, 
+                LastName: username,  
                 username: username,
                 email: email,
-                password: hash
+                password: hashedPassword,
             }
-        })
-    })
-
-    res.redirect('/signin');
-
+        });
+        return res.status(201).json({ message: 'User created successfully' });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Internal Server Error' });
+    } finally {
+        await prisma.$disconnect();
+    }
 }
-
-

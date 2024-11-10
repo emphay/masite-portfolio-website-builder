@@ -13,9 +13,11 @@ import { Spin } from "antd";
 
 const SiteDesign: React.FC = () => {
   const { data: session } = useSession();
+  const [userId, setUserId] = useState<string | null>(null);
 
   // Initialize state with default values
   const [designData, setDesignData] = useState<SiteDesignConfig>({
+    id: "",
     accentColor: "",
     backgroundColor: "",
     primaryFontColor: "",
@@ -91,11 +93,6 @@ const SiteDesign: React.FC = () => {
 
   useEffect(() => {
     const fetchDesignData = async () => {
-      // if (!session) {
-      //   console.error("User session is not available");
-      //   return;
-      // }
-
       try {
         const response = await fetch("/api/getProfile");
         if (!response.ok) {
@@ -103,17 +100,20 @@ const SiteDesign: React.FC = () => {
         }
         const data = await response.json();
 
-        // console.log("Data:", data);
+        console.log("Data:", data);
         setLoading(false);
+        setUserId(data.id);
 
-        setDesignData({
-          accentColor: data.SiteDesign[0].accentColor,
-          backgroundColor: data.SiteDesign[0].backgroundColor,
-          primaryFontColor: data.SiteDesign[0].primaryFontColor,
-          secondaryFontColor: data.SiteDesign[0].secondaryFontColor,
-          primaryFontFamily: data.SiteDesign[0].primaryFontFamily,
-          secondaryFontFamily: data.SiteDesign[0].secondaryFontFamily,
-        });
+        setDesignData((prevDesignData) => ({
+          ...prevDesignData,
+          id: data.id,
+          accentColor: data.SiteDesign[0]?.accentColor || prevDesignData.accentColor,
+          backgroundColor: data.SiteDesign[0]?.backgroundColor || prevDesignData.backgroundColor,
+          primaryFontColor: data.SiteDesign[0]?.primaryFontColor || prevDesignData.primaryFontColor,
+          secondaryFontColor: data.SiteDesign[0]?.secondaryFontColor || prevDesignData.secondaryFontColor,
+          primaryFontFamily: data.SiteDesign[0]?.primaryFontFamily || prevDesignData.primaryFontFamily,
+          secondaryFontFamily: data.SiteDesign[0]?.secondaryFontFamily || prevDesignData.secondaryFontFamily,
+        }));
 
         const contact =
           data.links.filter(
@@ -198,7 +198,7 @@ const SiteDesign: React.FC = () => {
           })),
           handleProjectsConfigUpdate: (newConfig: ProjectsConfig) => setProjectsData(newConfig), // Include this method
         }
-        // console.log("Hello World: ", proj);
+        console.log("Hello World: ", proj);
 
         setProjectsData(proj);
 
@@ -222,12 +222,12 @@ const SiteDesign: React.FC = () => {
 
         setPresentationData(presentConfig);
 
-        // console.log("Design Data: ", designData);
-        // console.log("Nav Data: ", navData);
-        // console.log("About Data: ", aboutData);
-        // console.log("Articles Data: ", articlesData);
-        // console.log("Projects Data: ", projectsData);
-        // console.log("Presentation Data: ", presentationData);
+        console.log("Design Data: ", designData);
+        console.log("Nav Data: ", navData);
+        console.log("About Data: ", aboutData);
+        console.log("Articles Data: ", articlesData);
+        console.log("Projects Data: ", projectsData);
+        console.log("Presentation Data: ", presentationData);
       } catch (error) {
         console.error("Error fetching design data:", error);
       }
@@ -237,11 +237,6 @@ const SiteDesign: React.FC = () => {
   });
 
   const saveSiteDesignConfig = async (siteDesignConfig: SiteDesignConfig) => {
-
-    if (!session) {
-      console.error("User session is not available");
-      return;
-    }
 
     console.log("Data to be saved: ", siteDesignConfig);
 

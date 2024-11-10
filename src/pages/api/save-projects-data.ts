@@ -22,74 +22,71 @@ type ProjectsConfig = {
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = await getServerSession(req, res, authOptions);
 
-
   if (req.method === "PUT") {
     const { id, projects, projectDisplayLayout } = req.body as ProjectsConfig;
-    console.log("The User ID is ", id);
-    console.log('The Projects: ', projects);
-    console.log('Project Display Layout: ', projectDisplayLayout);
 
     try {
-      if (projects.filter(p => p.id).length === projects.length) {
-        const updateQueries = projects.map(project => {
-          return prisma.project.update({
-            data: {
-              projectTitle: project.projectTitle,
-              projectDescription: project.projectDescription,
-              projectLink: project.projectLink,
-              isVisible: project.isVisible,
-            },
-            where: {
-              id: project.id,
-              userId: id
-            },
-          });
-        });
-      
-        try {
-          const updateResults = await Promise.all(updateQueries);
-          console.log("Updated Projects: ", updateResults);
-        } catch (error) {
-          console.error("Error updating projects: ", error);
-        }
-      } else {
-        const insertQueries = projects.map(project => {
-          return prisma.project.create({
-            data: {
-              userId: id, 
-              id: project.id,
-              projectTitle: project.projectTitle,
-              projectDescription: project.projectDescription,
-              projectLink: project.projectLink,
-              isVisible: project.isVisible,
-            },
-          });
-        });
-      
-        try {
-          const insertResults = await Promise.all(insertQueries);
-          console.log("Inserted Projects: ", insertResults);
-        } catch (error) {
-          console.error("Error inserting projects: ", error);
-        }
-      }
-      
-      await prisma.siteDesign.upsert({
+      // Retrieve current data for comparison
+      const existingProjects = await prisma.project.findMany({
         where: { userId: id },
-        update: { projectDisplayLayout: projectDisplayLayout },
-        create: {
-          userId: id,
-          projectDisplayLayout: projectDisplayLayout
-        }
       });
 
-      res.status(200).json({ message: 'Projects and display layout saved successfully' });
+      const existingLayout = await prisma.siteDesign.findUnique({
+        where: { userId: id },
+        select: { projectDisplayLayout: true },
+      });
+
+      const layoutNeedsUpdate = existingLayout?.projectDisplayLayout !== projectDisplayLayout;
+      const projectsChanged = JSON.stringify(projects) !== JSON.stringify(existingProjects);
+
+      if (projectsChanged) {
+        const updateQueries = projects.map((project) => {
+          if (project.id) {
+            return prisma.project.update({
+              data: {
+                projectTitle: project.projectTitle,
+                projectDescription: project.projectDescription,
+                projectLink: project.projectLink,
+                isVisible: project.isVisible,
+              },
+              where: { id: project.id, userId: id },
+            });
+          } else {
+            return prisma.project.create({
+              data: {
+                userId: id,
+                projectTitle: project.projectTitle,
+                projectDescription: project.projectDescription,
+                projectLink: project.projectLink,
+                isVisible: project.isVisible,
+              },
+            });
+          }
+        });
+
+        try {
+          await Promise.all(updateQueries);
+          console.log("Projects updated or inserted.");
+        } catch (error) {
+          console.error("Error updating/inserting projects:", error);
+        }
+      }
+      if (layoutNeedsUpdate) {
+        await prisma.siteDesign.upsert({
+          where: { userId: id },
+          update: { projectDisplayLayout },
+          create: { userId: id, projectDisplayLayout },
+        });
+        console.log("Display layout updated.");
+      }
+
+      res.status(200).json({ message: "Projects and/or display layout saved successfully" });
     } catch (error) {
-      console.error('Error saving projects and display layout:', error);
-      res.status(500).json({ message: 'Internal Server Error' });
+      console.error("Error saving projects and display layout:", error);
+      res.status(500).json({ message: "Internal Server Error" });
     }
   } else {
-    res.setHeader('Allow', ['PUT']);
+    res.setHeader("Allow", ["PUT"]);
     res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }

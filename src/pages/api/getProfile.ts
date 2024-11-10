@@ -7,6 +7,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method === 'GET') {
     try {
       const user = await prisma.user.findFirst({
+        where: {
+          id: {
+            not: '',
+          },
+        },
         select: {
           id: true,
           FirstName: true,

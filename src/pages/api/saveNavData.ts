@@ -10,11 +10,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(405).json({ message: 'Method not allowed' });
     }
 
-    const session = await getServerSession(req, res, authOptions);
-    console.log('Session: ', session);
-
     const {
-        id, firstName, lastName, aboutText, contactType, contactValue, articleText, projectText, presentationText
+        firstName, lastName, aboutText, contactType, contactValue, articleText, projectText, presentationText
     } = req.body;
 
     const navigationLinks = [
@@ -26,7 +23,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     ];
 
     console.log('Request Body:', req.body);
-    const userId = id; 
+    const userId = req.body.id; 
 
     try {
         await prisma.$transaction(async (prisma) => {
