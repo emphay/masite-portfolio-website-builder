@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { getSession, useSession } from "next-auth/react";
 import { GetServerSidePropsContext } from "next";
 import styles from "@/styles/Home.module.css";
-import { Layout, Button, Spin, Space, Dropdown, Menu, message } from "antd";
+import { Layout, Button, Spin, Space, Dropdown, Menu } from "antd";
 import { PhoneOutlined, MailOutlined, WhatsAppOutlined } from "@ant-design/icons";
 import Navigation from "@/components/builder/Nav/Navigation";
 import About from "@/components/builder/About/About";
@@ -32,7 +32,7 @@ const inter = Inter({ subsets: ["latin"] });
 const { Sider, Content } = Layout;
 
 export default function Home() {
-  const { data: session, status } = useSession();
+  //const { data: session, status } = useSession();
   const router = useRouter();
 
   const [designData, setDesignData] = useState<SiteDesignConfig | undefined>(undefined);
@@ -47,9 +47,6 @@ export default function Home() {
     const fetchDesignData = async () => {
       // if (!session) {
       //   console.error("User session is not available");
-      //   message.error("You are not signed in");
-      //   message.info("Redirecting.....");
-      //   router.push("/signin");
       //   return;
       // }
 
@@ -60,14 +57,14 @@ export default function Home() {
         }
         const data = await response.json();
 
-        console.log("Data:", data);
+        // console.log("Data:", data);
         setLoading(false);
 
         const siteDesign = data.SiteDesign?.[0] || {};
         const contact = data.links.find((link: { icon: string }) => link.icon === "Contacts") || {};
 
         setDesignData({
-          id: data.id,
+          id: siteDesign.id,
           accentColor: siteDesign.accentColor,
           backgroundColor: siteDesign.backgroundColor,
           primaryFontColor: siteDesign.primaryFontColor,
@@ -192,9 +189,21 @@ export default function Home() {
   }
 
   if (!designData || !navData || !aboutData || !articlesData || !projectsData || !presentationData) {
-    return <div>Error loading data. Kindly Add Data</div>;
-
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        textAlign: 'center',
+        fontSize: '20px',
+        color: 'red'
+      }}>
+        Error loading data. Kindly Add Data
+      </div>
+    );
   }
+
 
   let contactIcon;
   let contactValue = navData.contactValue;

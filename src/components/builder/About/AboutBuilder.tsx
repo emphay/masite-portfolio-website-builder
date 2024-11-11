@@ -83,7 +83,7 @@ const AboutBuilder: React.FC<{
   const handleFileUpload = async (file: RcFile) => {
     try {
       const tempUrl = URL.createObjectURL(file);
-      setFileList([{ uid: "-1", url: tempUrl, name: file.name, status: "uploading" }]);
+      setTempLink(tempUrl);
 
       const reader = new FileReader();
       reader.onloadend = async () => {
@@ -91,14 +91,24 @@ const AboutBuilder: React.FC<{
 
         const response = await fetch("/api/uploadProfileImage", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ file: base64, fileName: file.name }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            file: base64,
+            fileName: file.name,
+          }),
         });
 
         if (response.ok) {
           const data = await response.json();
           const newS3Link = data.url;
-          setFileList([{ uid: "-1", url: newS3Link, name: "image", status: "done" }]);
+
+          setS3Link(newS3Link);
+
+          setFileList(prev => [
+            { uid: "-1", url: newS3Link, name: "image" },
+          ]);
           setAboutConfig(prev => ({ ...prev, image: newS3Link }));
 
           message.success("File uploaded to S3 successfully");
@@ -114,7 +124,7 @@ const AboutBuilder: React.FC<{
   };
 
   const [fileList, setFileList] = useState<UploadFile[]>([
-    { uid: "-1", url: s3Link || config.image, name: "image" },
+    { uid: "-1", url: s3Link || config.image, name: "image" }, // Use the existing config.image if available
   ]);
 
   const handleImageUpload = ({ fileList: newFileList }: { fileList: UploadFile[] }) => {

@@ -5,19 +5,29 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  const { id, accentColor, backgroundColor, primaryFontColor, secondaryFontColor, primaryFontFamily, secondaryFontFamily } = req.body;
-  const userId= req.body.id;
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const session = await getServerSession(req, res, authOptions);
 
-    if (req.method === "POST") {
+  // If there's no session, the user is unauthorized.
+  if (!session) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const userId = session.id;
+
+  // Destructure the necessary properties from the request body.
+  const { accentColor, backgroundColor, primaryFontColor, secondaryFontColor, primaryFontFamily, secondaryFontFamily } = req.body;
+
+  // Check if all necessary properties are present
+  if (!accentColor || !backgroundColor || !primaryFontColor || !secondaryFontColor || !primaryFontFamily || !secondaryFontFamily) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  if (req.method === "POST") {
     try {
       let siteDesign = await prisma.siteDesign.findUnique({
         where: { userId },
       });
-
       if (!siteDesign) {
         siteDesign = await prisma.siteDesign.create({
           data: {
@@ -43,14 +53,13 @@ export default async function handler(
           },
         });
       }
-
       res.status(200).json(siteDesign);
     } catch (error) {
-      console.error('Error saving design configuration:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
+      console.error("Error saving design configuration:", error);
+      res.status(500).json({ error: "Internal Server Error" });
     }
   } else {
-    res.setHeader('Allow', ['POST']);
+    res.setHeader("Allow", ["POST"]);
     res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }
